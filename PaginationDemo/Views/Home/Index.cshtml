@@ -1,0 +1,178 @@
+﻿@model IEnumerable<PaginationDemo.Models.User>
+@{
+    ViewBag.Title = "Users";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row border-bottom">
+    <nav class="navbar" role="navigation" style="margin-bottom: 0">
+        <div class="navbar-header" style="width:100%;">
+            <div class="row">
+                <div class="col-sm-12">
+          @*          <span class="minimalize-styl-2 page-nav-header">Users</span>*@
+                </div>
+            </div>
+        </div>
+    </nav>
+</div>
+<!-- begin content -->
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">               
+                <div class="ibox-content">
+                    <div class="row">
+                        <div class="col-sm-12" id="subscriptionSearchResult">
+                            @Html.Partial("_UserList", Model)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                        </div>
+                    </div>
+                </div>
+                @Html.Hidden("hdnPageNumber", "1")
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $('.footable').footable({});
+    });
+
+    function UserListPaging(pageNumber, sortColumn, sortOrder) {
+
+        var urlGetUsersList = '@Url.Action("GetUsersList", "Home")';
+        var pageNo = 1;
+        if (pageNumber != undefined && pageNumber != "")
+            pageNo = pageNumber;
+        $.ajax({
+            url: '@Url.Action("GetUsersList", "Home")',
+            data: {
+                pageNo: pageNo,
+                sortColumn: sortColumn,
+                sortOrder: sortOrder
+            },
+            method: "GET",
+            success: function (result) {
+                $("#hdnPageNumber").val(pageNo);
+                $("#subscriptionSearchResult").html(result);
+                $('.userTable').footable();
+                SetColumnOrder(sortOrder, sortColumn);
+            }
+        });
+    }
+
+    function RemoveSortingClass(sortOrder, sortColumn) {
+
+        var controlName = "tdFirstName";
+        if (sortOrder != undefined && sortColumn != undefined)
+            $("#" + controlName).removeClass('footable-sorted-desc');
+        $("#" + controlName).removeClass('footable-sorted');
+        $("#" + controlName).removeClass('sorting-col-heading');
+        $("#" + controlName).addClass('footable-sort-indicator');
+        if(sortColumn == "")
+        {
+            $("#" + controlName).removeClass('ffootable-sort-indicator');
+            $("#" + controlName).addClass('footable-sorted');
+        }
+
+    }
+
+    function SetColumnOrder(sortOrder, sortColumn) {
+
+        RemoveSortingClass(sortOrder, sortColumn);
+        var controlNameSuffix = "td";
+        switch (sortOrder) {
+
+            case "ASC":
+                {
+                    switch (sortColumn) {
+                        case "First Name":
+                            {
+                                $("#" + controlNameSuffix + "FirstName").removeClass('footable-sorted-desc');
+                                $("#" + controlNameSuffix + "FirstName").addClass('footable-sorted sorting-col-heading');
+                            }
+                            break;
+                        case "Last Name":
+                            {
+                                $("#" + controlNameSuffix + "LastName").removeClass('footable-sorted-desc');
+                                $("#" + controlNameSuffix + "LastName").addClass('footable-sorted sorting-col-heading');
+                            }
+                            break;
+                        case "Email Id":
+                            {
+                                $("#" + controlNameSuffix + "Email").removeClass('footable-sorted-desc');
+                                $("#" + controlNameSuffix + "Email").addClass('footable-sorted sorting-col-heading');
+                            }
+                            break;
+                        case "Address":
+                            {
+                                $("#" + controlNameSuffix + "MobilePhone").removeClass('footable-sorted-desc');
+                                $("#" + controlNameSuffix + "MobilePhone").addClass('footable-sorted sorting-col-heading');
+                            }
+                            break;
+                    }
+                }
+                break;
+            case "DESC":
+                {
+                    switch (sortColumn) {
+                        case "First Name":
+                            {
+                                $("#" + controlNameSuffix + "FirstName").removeClass('footable-sorted');
+                                $("#" + controlNameSuffix + "FirstName").addClass('footable-sorted-desc sorting-col-heading');
+                            }
+                            break;
+                        case "Last Name":
+                            {
+                                $("#" + controlNameSuffix + "LastName").removeClass('footable-sorted');
+                                $("#" + controlNameSuffix + "LastName").addClass('footable-sorted-desc sorting-col-heading');
+                            }
+                            break;
+                        case "Email Id":
+                            {
+                                $("#" + controlNameSuffix + "Email").removeClass('footable-sorted');
+                                $("#" + controlNameSuffix + "Email").addClass('footable-sorted-desc sorting-col-heading');
+                            }
+                            break;
+                        case "Address":
+                            {
+                                $("#" + controlNameSuffix + "MobilePhone").removeClass('footable-sorted');
+                                $("#" + controlNameSuffix + "MobilePhone").addClass('footable-sorted-desc sorting-col-heading');
+                            }
+                            break;
+                    }
+                }
+                break;
+        }
+    }
+
+    function createPagination(pageNumber, totalCount, pageSize, sortColumn, sortOrder, funcName, htmlElem, isTrue) {
+        var number_of_items = totalCount;
+        var number_of_pages = Math.ceil(number_of_items / pageSize);
+        var number_of_pages_todisplay = 5;
+        var navigation_html = '';
+        var current_page = pageNumber;
+        var current_link = (number_of_pages_todisplay >= current_page ? 1 : number_of_pages_todisplay + 1);
+
+        if (current_page > 1)
+            current_link = current_page;
+
+        if (current_link == number_of_pages - 1) current_link = current_link - 3;
+        else if (current_link == number_of_pages) current_link = current_link - 4;
+        else if (current_link > 2) current_link = current_link - 2;
+        else current_link = 1;
+
+        var pages = number_of_pages_todisplay;
+        while (pages != 0) {
+            if (number_of_pages < current_link) { break; }
+            if (current_link >= 1)
+                navigation_html += "<li class='footable-page " + ((current_link == current_page) ? "active" : "") + "'> <a href=\"#\" data-page=\"" + current_link + "\" " + ((current_link == current_page) ? "" : " onclick=\"" + funcName + "(" + current_link + ",'" + sortColumn + "','" + sortOrder + "', " + isTrue + ");\"") + ">" + (current_link) + "</a></li>";
+            current_link++;
+            pages--;
+        }
+
+        $('#' + htmlElem).after(navigation_html);
+    }
+</script>

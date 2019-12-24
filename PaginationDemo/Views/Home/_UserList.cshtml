@@ -1,0 +1,152 @@
+﻿@model IEnumerable<PaginationDemo.Models.User>
+
+@{
+    var successMessage = Convert.ToString(TempData["successMessage"]);
+    int totalCount = ViewBag.TotalCount;
+    int pageNumber = ViewBag.PageNo;
+    string sortOrder = ViewBag.SortOrder;
+    string sortColumn = ViewBag.SortColumn;
+    int upperCount = pageNumber * ViewBag.pageSize;
+    int lowerCount = upperCount - (ViewBag.pageSize - 1);
+    int lastPageNumber = (int)Math.Ceiling((double)totalCount / (double)(ViewBag.pageSize));
+    int pageSize = ViewBag.pageSize;
+}
+
+
+<div class="table-responsive">
+    <table class="footable userTable table table-stripped toggle-arrow-tiny" data-sort="true" id="azureIncident" data-page="false">
+        <thead>
+            <tr>
+
+                <th id="tdFirstName" style="width:17%">First Name</th>
+                <th data-hide="phone" id="tdLastName" style="width:17%">Last Name</th>
+                <th id="tdEmail" style="width:25%">Email Id</th>
+                <th data-hide="phone" id="tdMobilePhone" style="width:15%">Address</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@user.FirstName</td>
+                        <td>@user.LastName</td>
+                        <td>@user.Email</td>
+                        <td>@user.Address</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4">
+                        No data found.
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot class="hide-if-no-paging">
+            <tr>
+                <td colspan="4">
+                    <ul class="pagination pull-right"></ul>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+<div class="row mbs">
+    <div class="col-md-8 col-sm-9 col-xs-12">
+        @{
+            if (totalCount > 0)
+            {
+                <ul class="pagination" style="margin:0">
+                    @{
+                        if (pageNumber == 1)
+                        {
+                            <li class="footable-page-arrow disabled">
+                                <a data-page="first" href="#">«</a>
+                            </li>
+                            <li class="footable-page-arrow disabled" id="attach-pagination">
+                                <a data-page="prev" href="#">‹</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="footable-page-arrow">
+                                <a data-page="first" href="#" onclick="UserListPaging(1,'@sortColumn','@sortOrder',true)">«</a>
+                            </li>
+                            <li class="footable-page-arrow" id="attach-pagination">
+                                <a data-page="prev" href="#" onclick="UserListPaging(@(pageNumber - 1),'@sortColumn','@sortOrder',true)">‹</a>
+                            </li>
+                        }
+                    }
+
+                    @{
+                        if (totalCount > upperCount)
+                        {
+                            <li class="footable-page-arrow">
+                                <a data-page="next" href="#" onclick="UserListPaging(@(pageNumber + 1),'@sortColumn','@sortOrder',true)">›</a>
+                            </li>
+                            <li class="footable-page-arrow">
+                                <a data-page="last" href="#" onclick="UserListPaging(@lastPageNumber,'@sortColumn','@sortOrder',true)">»</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="footable-page-arrow disabled">
+                                <a data-page="next" href="#">›</a>
+                            </li>
+                            <li class="footable-page-arrow disabled">
+                                <a data-page="last" href="#">»</a>
+                            </li>
+                        }
+                    }
+                </ul>
+                        }
+        }
+    </div>
+    <div>
+        @if (totalCount > 0)
+        {
+            <div class="col-md-4 col-sm-3 col-xs-12 m-t-xs totalCount text-right">Total Users : @(totalCount)</div>
+        }
+    </div>
+</div>
+
+<script type="text/javascript">
+    var totalCount = @totalCount;
+    var pageNumber = @pageNumber;
+    var pageSize = @pageSize;
+    var sortColumn = '@sortColumn';
+    var sortOrder = '@sortOrder';
+    var funcName = "UserListPaging"
+    var htmlElem = "attach-pagination";
+    var isTrue = true;
+
+    $(function () {
+        $('.userTable').footable({
+        });
+        $("#tdFirstName").addClass('footable-sorted sorting-col-heading');
+
+        if(sortColumn =="")
+        {
+            sortColumn="First Name"
+        }
+        if(sortOrder=="")
+        {
+            sortOrder="ASC";
+        }
+        createPagination(pageNumber, totalCount, pageSize, sortColumn, sortOrder, funcName, htmlElem, isTrue);
+        if(totalCount == 0)
+        {
+            $(".userTable ").children().find('.footable-toggle').removeClass("footable-toggle");
+        }
+    });
+
+    $('.userTable').footable().bind({
+        'footable_sorting': function (e) {
+            UserListPaging($("#hdnPageNumber").val(), e.column.name, e.direction);
+        }
+    });
+</script>
